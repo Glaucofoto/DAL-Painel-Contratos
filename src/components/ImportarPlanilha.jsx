@@ -58,8 +58,64 @@ export default function ImportarPlanilha({
       <div>
         <h2 className="text-lg font-bold text-primary">Importar planilha de contratos</h2>
         <p className="mt-1 text-sm text-gray-600">
-          Este painel é alimentado por uma planilha exportada do Contratos.gov.br.
+          Já sabe como exportar? Solte o arquivo abaixo. Primeira vez? As instruções
+          estão logo em seguida.
         </p>
+      </div>
+
+      {/* Área de upload — no topo, para acesso rápido de quem já conhece o fluxo */}
+      <div
+        onDragOver={(e) => {
+          e.preventDefault()
+          setArraste(true)
+        }}
+        onDragLeave={() => setArraste(false)}
+        onDrop={aoSoltar}
+        className={`flex flex-col items-center justify-center border-2 border-dashed px-4 py-10 text-center transition-colors ${
+          arraste ? 'border-primary bg-panel' : 'border-gray-300 bg-white'
+        }`}
+      >
+        <p className="text-sm text-gray-600">Arraste a planilha aqui ou</p>
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={importando}
+          className="mt-3 bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#142d54] disabled:opacity-50"
+        >
+          {importando ? 'Lendo planilha...' : 'Selecionar arquivo'}
+        </button>
+        <p className="mt-2 text-xs text-gray-400">Formatos aceitos: .xlsx e .csv</p>
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".xlsx,.xls,.csv"
+          className="hidden"
+          onChange={(e) => selecionar(e.target.files?.[0])}
+        />
+      </div>
+
+      {erro && (
+        <p className="border border-danger bg-danger-bg px-3 py-2 text-sm text-danger">
+          {erro}
+        </p>
+      )}
+
+      {podeVoltar && (
+        <button
+          type="button"
+          onClick={onVoltar}
+          className="text-sm text-gray-500 underline hover:text-gray-700"
+        >
+          ← Voltar aos dados atuais
+        </button>
+      )}
+
+      {/* Instruções — abaixo do upload; o gestor lê nas primeiras vezes e depois
+          segue direto para o carregamento acima. */}
+      <div className="border-t border-gray-200 pt-6">
+        <h3 className="text-base font-bold text-primary">
+          Como exportar a planilha do Contratos.gov.br
+        </h3>
       </div>
 
       {/* Por que não é automático */}
@@ -126,55 +182,6 @@ export default function ImportarPlanilha({
           ))}
         </ul>
       </div>
-
-      {/* Área de upload */}
-      <div
-        onDragOver={(e) => {
-          e.preventDefault()
-          setArraste(true)
-        }}
-        onDragLeave={() => setArraste(false)}
-        onDrop={aoSoltar}
-        className={`flex flex-col items-center justify-center border-2 border-dashed px-4 py-10 text-center transition-colors ${
-          arraste ? 'border-primary bg-panel' : 'border-gray-300 bg-white'
-        }`}
-      >
-        <p className="text-sm text-gray-600">
-          Arraste a planilha aqui ou
-        </p>
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          disabled={importando}
-          className="mt-3 bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#142d54] disabled:opacity-50"
-        >
-          {importando ? 'Lendo planilha...' : 'Selecionar arquivo'}
-        </button>
-        <p className="mt-2 text-xs text-gray-400">Formatos aceitos: .xlsx e .csv</p>
-        <input
-          ref={inputRef}
-          type="file"
-          accept=".xlsx,.xls,.csv"
-          className="hidden"
-          onChange={(e) => selecionar(e.target.files?.[0])}
-        />
-      </div>
-
-      {erro && (
-        <p className="border border-danger bg-danger-bg px-3 py-2 text-sm text-danger">
-          {erro}
-        </p>
-      )}
-
-      {podeVoltar && (
-        <button
-          type="button"
-          onClick={onVoltar}
-          className="text-sm text-gray-500 underline hover:text-gray-700"
-        >
-          ← Voltar aos dados atuais
-        </button>
-      )}
     </div>
   )
 }
