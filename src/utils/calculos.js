@@ -70,6 +70,11 @@ export function nivelSemaforo(dias) {
   return 'ok'
 }
 
+// Prorrogáveis vencendo dentro de uma janela (subconjunto de contratosAVencer).
+export function prorrogaveisAVencer(contratos, janela = CONFIG.JANELA_VENCIMENTO_DIAS) {
+  return contratosAVencer(contratos, janela).filter((c) => c.prorrogavel)
+}
+
 // --- Agregações para os gráficos da Visão Geral ----------------------------
 export function distribuicaoPorTipo(contratos) {
   const mapa = new Map()
@@ -80,4 +85,84 @@ export function distribuicaoPorTipo(contratos) {
     mapa.set(c.tipo, atual)
   }
   return [...mapa.values()]
+}
+
+// Agregação genérica por um campo textual (ex.: modalidade, categoria).
+export function agruparPorCampo(contratos, campo, rotuloVazio = 'Não informado') {
+  const mapa = new Map()
+  for (const c of contratos) {
+    const chave = String(c[campo] || '').trim() || rotuloVazio
+    const atual = mapa.get(chave) || { rotulo: chave, quantidade: 0, valor: 0 }
+    atual.quantidade += 1
+    atual.valor += c.valorGlobal
+    mapa.set(chave, atual)
+  }
+  return [...mapa.values()].sort((a, b) => b.valor - a.valor)
+}
+
+// ---------------------------------------------------------------------------
+// Produção da área (por ano de formalização).
+//
+// "Formalização" usa a data de início da vigência (a planilha não traz a data
+// de assinatura). Os instrumentos são agrupados em quatro faixas para leitura
+// gerencial: Contratos, Empenhos, Aditivos (Termos Aditivos / Apostilamentos —
+// proxy de prorrogações e alterações) e Outros.
+// ---------------------------------------------------------------------------
+const MESES_CURTOS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+
+export function faixaProducao(c) {
+  const t = normalizar(c.tipo)
+  if (/aditiv|apostila/.test(t)) return 'Aditivos'
+  if (c.isEmpenho || t === 'empenho') return 'Empenhos'
+  if (t === 'contrato') return 'Contratos'
+  return 'Outros'
+}
+
+function normalizar(texto) {
+  return String(texto || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .trim()
+}
+
+// Anos presentes na base (por data de formalização), do mais recente ao mais antigo.
+export function anosFormalizacao(contratos) {
+  const anos = new Set()
+  for (const c of contratos) {
+    if (c.dataFormalizacao) anos.add(c.dataFormalizacao.getFullYear())
+  }
+  return [...anos].sort((a, b) => b - a)
+}
+
+export function producaoAno(contratos, ano) {
+  const doAno = contratos.filter(
+    (c) => c.dataFormalizacao && c.dataFormalizacao.getFullYear() === ano,
+  )
+
+  const faixas = { Contratos: 0, Empenhos: 0, Aditivos: 0, Outros: 0 }
+  const porMes = MESES_CURTOS.map((mes) => ({
+    mes,
+    Contratos: 0,
+    Empenhos: 0,
+    Aditivos: 0,
+    Outros: 0,
+  }))
+  let valorTotal = 0
+
+  for (const c of doAno) {
+    const faixa = faixaProducao(c)
+    faixas[faixa] += 1
+    valorTotal += c.valorGlobal
+    porMes[c.dataFormalizacao.getMonth()][faixa] += 1
+  }
+
+  return {
+    ano,
+    total: doAno.length,
+    valorTotal,
+    faixas,
+    porMes,
+    porTipo: distribuicaoPorTipo(doAno).sort((a, b) => b.quantidade - a.quantidade),
+  }
 }

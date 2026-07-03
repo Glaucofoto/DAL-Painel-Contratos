@@ -7,6 +7,7 @@ import RecemFormalizados from './components/RecemFormalizados.jsx'
 import AVencer from './components/AVencer.jsx'
 import Prorrogaveis from './components/Prorrogaveis.jsx'
 import Empenhos from './components/Empenhos.jsx'
+import Producao from './components/Producao.jsx'
 import ImportarPlanilha from './components/ImportarPlanilha.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import { useAuth } from './hooks/useAuth.js'
@@ -69,6 +70,7 @@ function Painel() {
             {aba === 'vencer' && <AVencer contratos={contratos} />}
             {aba === 'prorrogaveis' && <Prorrogaveis contratos={contratos} />}
             {aba === 'empenhos' && <Empenhos contratos={contratos} />}
+            {aba === 'producao' && <Producao contratos={contratos} />}
           </>
         )}
       </main>

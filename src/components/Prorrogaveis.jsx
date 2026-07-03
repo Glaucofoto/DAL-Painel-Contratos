@@ -1,21 +1,49 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import CardContrato from './CardContrato.jsx'
-import { contratosAVencer } from '../utils/calculos.js'
+import { prorrogaveisAVencer } from '../utils/calculos.js'
 import { CONFIG } from '../config/config.js'
 
 export default function Prorrogaveis({ contratos }) {
+  const [janela, setJanela] = useState(CONFIG.JANELA_PRORROGAVEL_PADRAO)
+
   const lista = useMemo(
-    () => contratosAVencer(contratos).filter((c) => c.prorrogavel),
-    [contratos],
+    () => prorrogaveisAVencer(contratos, janela),
+    [contratos, janela],
   )
 
   return (
     <div className="space-y-4">
+      {/* Seletor de janela (30/60/90 dias) */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-medium text-gray-500">Vencimento em até:</span>
+        <div className="inline-flex overflow-hidden border border-gray-300">
+          {CONFIG.JANELAS_PRORROGAVEL.map((dias, i) => {
+            const ativa = dias === janela
+            return (
+              <button
+                key={dias}
+                type="button"
+                onClick={() => setJanela(dias)}
+                className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                  i > 0 ? 'border-l border-gray-300' : ''
+                } ${
+                  ativa
+                    ? 'bg-primary text-white'
+                    : 'bg-white text-gray-600 hover:bg-panel'
+                }`}
+              >
+                {dias} dias
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
       <div className="border border-danger bg-danger-bg p-4">
         <p className="text-sm font-semibold text-danger">
           {lista.length === 0
-            ? `Nenhum contrato prorrogável vence nos próximos ${CONFIG.JANELA_VENCIMENTO_DIAS} dias.`
-            : `${lista.length} contrato(s) prorrogável(is) vencem nos próximos ${CONFIG.JANELA_VENCIMENTO_DIAS} dias e requerem análise.`}
+            ? `Nenhum contrato prorrogável vence nos próximos ${janela} dias.`
+            : `${lista.length} contrato(s) prorrogável(is) vencem nos próximos ${janela} dias e requerem análise.`}
         </p>
         <p className="mt-1 text-xs text-gray-600">
           Prorrogação de serviços e fornecimentos contínuos — art. 107 da Lei nº

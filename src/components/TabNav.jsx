@@ -4,6 +4,7 @@ const ABAS = [
   { id: 'vencer', rotulo: 'A Vencer' },
   { id: 'prorrogaveis', rotulo: 'Prorrogáveis' },
   { id: 'empenhos', rotulo: 'Empenhos' },
+  { id: 'producao', rotulo: 'Produção' },
 ]
 
 export default function TabNav({ abaAtiva, aoMudar }) {

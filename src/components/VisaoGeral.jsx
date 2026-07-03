@@ -13,12 +13,14 @@ import {
 } from 'recharts'
 import CardIndicador from './CardIndicador.jsx'
 import {
+  agruparPorCampo,
   contratosAVencer,
   distribuicaoPorTipo,
   estaAtivo,
   formalizadosPorDia,
+  prorrogaveisAVencer,
 } from '../utils/calculos.js'
-import { corTipo } from '../utils/tiposInstrumento.js'
+import { corPorIndice, corTipo } from '../utils/tiposInstrumento.js'
 import { formatarMoeda, formatarPercentual } from '../utils/formatters.js'
 
 function moedaCompacta(valor) {
@@ -36,6 +38,7 @@ export default function VisaoGeral({ contratos }) {
     const aVencer = contratosAVencer(contratos)
     const prorrogaveis = aVencer.filter((c) => c.prorrogavel).length
     const naoProrrogaveis = aVencer.length - prorrogaveis
+    const prorrogaveis60 = prorrogaveisAVencer(contratos, 60).length
 
     const porTipo = distribuicaoPorTipo(contratos)
     const total = contratos.length || 1
@@ -43,6 +46,8 @@ export default function VisaoGeral({ contratos }) {
       .map((t) => ({ ...t, percentual: (t.quantidade / total) * 100 }))
       .sort((a, b) => b.quantidade - a.quantidade)
     const barras = [...porTipo].sort((a, b) => b.valor - a.valor)
+    // Top modalidades por valor (limita a 8 para leitura).
+    const modalidades = agruparPorCampo(contratos, 'modalidade').slice(0, 8)
 
     return {
       ativos: ativos.length,
@@ -51,8 +56,10 @@ export default function VisaoGeral({ contratos }) {
       aVencerTotal: aVencer.length,
       prorrogaveis,
       naoProrrogaveis,
+      prorrogaveis60,
       pizza,
       barras,
+      modalidades,
     }
   }, [contratos])
 
@@ -72,19 +79,32 @@ export default function VisaoGeral({ contratos }) {
         />
       </div>
 
-      {/* Destaque de vencimentos críticos */}
-      <div className="border border-danger bg-danger-bg p-4">
-        <p className="text-sm font-semibold text-danger">
-          {resumo.aVencerTotal === 0
-            ? 'Nenhum contrato vence nos próximos 30 dias.'
-            : `${resumo.aVencerTotal} contrato(s) vencem nos próximos 30 dias.`}
-        </p>
-        {resumo.aVencerTotal > 0 && (
-          <p className="mt-1 text-xs text-gray-600">
-            {resumo.prorrogaveis} prorrogável(is) · {resumo.naoProrrogaveis} não
-            prorrogável(is)
+      {/* Destaques de vencimento */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="border border-danger bg-danger-bg p-4">
+          <p className="text-sm font-semibold text-danger">
+            {resumo.aVencerTotal === 0
+              ? 'Nenhum contrato vence nos próximos 30 dias.'
+              : `${resumo.aVencerTotal} contrato(s) vencem nos próximos 30 dias.`}
           </p>
-        )}
+          {resumo.aVencerTotal > 0 && (
+            <p className="mt-1 text-xs text-gray-600">
+              {resumo.prorrogaveis} prorrogável(is) · {resumo.naoProrrogaveis} não
+              prorrogável(is)
+            </p>
+          )}
+        </div>
+        <div className="border border-warning bg-[#FFFBEB] p-4">
+          <p className="text-sm font-semibold text-warning">
+            {resumo.prorrogaveis60 === 0
+              ? 'Nenhum prorrogável vence nos próximos 60 dias.'
+              : `${resumo.prorrogaveis60} contrato(s) prorrogável(is) vencem nos próximos 60 dias.`}
+          </p>
+          <p className="mt-1 text-xs text-gray-600">
+            Janela ampliada para antecipar a instrução das prorrogações (ver aba
+            Prorrogáveis).
+          </p>
+        </div>
       </div>
 
       {/* Gráficos */}
@@ -163,6 +183,41 @@ export default function VisaoGeral({ contratos }) {
             </ResponsiveContainer>
           )}
         </div>
+      </div>
+
+      {/* Valor por modalidade de contratação */}
+      <div className="border border-gray-200 bg-white p-4">
+        <h3 className="mb-3 text-sm font-semibold text-primary">
+          Valor por modalidade de contratação
+        </h3>
+        {resumo.modalidades.length === 0 ? (
+          <p className="py-8 text-center text-sm text-gray-500">Sem dados.</p>
+        ) : (
+          <ResponsiveContainer
+            width="100%"
+            height={Math.max(200, resumo.modalidades.length * 44)}
+          >
+            <BarChart
+              data={resumo.modalidades}
+              layout="vertical"
+              margin={{ left: 8, right: 16, top: 4, bottom: 4 }}
+            >
+              <XAxis type="number" tickFormatter={moedaCompacta} tick={{ fontSize: 11 }} />
+              <YAxis type="category" dataKey="rotulo" width={130} tick={{ fontSize: 11 }} />
+              <Tooltip
+                formatter={(valor, _n, item) => [
+                  `${formatarMoeda(valor)} · ${item.payload.quantidade} instrumento(s)`,
+                  item.payload.rotulo,
+                ]}
+              />
+              <Bar dataKey="valor" radius={[0, 3, 3, 0]}>
+                {resumo.modalidades.map((m, i) => (
+                  <Cell key={m.rotulo} fill={corPorIndice(i)} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </div>
 
       {/* Nota metodológica */}
