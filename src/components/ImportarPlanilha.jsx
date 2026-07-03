@@ -36,6 +36,8 @@ export default function ImportarPlanilha({
   onImportar,
   importando,
   erro,
+  expirado = false,
+  prazoHoras,
   podeVoltar = false,
   onVoltar,
 }) {
@@ -62,6 +64,18 @@ export default function ImportarPlanilha({
           estão logo em seguida.
         </p>
       </div>
+
+      {expirado && (
+        <div className="border-l-4 border-warning bg-[#FFFBEB] p-4">
+          <p className="text-sm font-semibold text-warning">
+            Dados expirados — importe uma planilha atualizada.
+          </p>
+          <p className="mt-1 text-sm leading-relaxed text-gray-600">
+            A planilha anterior completou {prazoHoras || 9}h desde a importação e foi
+            descartada automaticamente, para o painel não exibir números defasados.
+          </p>
+        </div>
+      )}
 
       {/* Área de upload — no topo, para acesso rápido de quem já conhece o fluxo */}
       <div

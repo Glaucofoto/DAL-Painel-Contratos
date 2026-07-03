@@ -22,9 +22,12 @@ function Painel() {
     importadoEm,
     importando,
     erro,
+    expirado,
     pronto,
     temDados,
+    prazoHoras,
     importar,
+    limpar,
   } = useDados()
 
   async function handleImportar(file) {
@@ -32,15 +35,28 @@ function Painel() {
     if (resultado.ok) setModoImportar(false)
   }
 
-  const mostrarImportacao = pronto && (!temDados || modoImportar)
+  function handleLimpar() {
+    const ok = window.confirm(
+      'Limpar a planilha importada? Será necessário importar novamente para ver os dados.',
+    )
+    if (ok) {
+      limpar()
+      setModoImportar(false)
+    }
+  }
+
+  const mostrarImportacao = pronto && (!temDados || modoImportar || expirado)
 
   return (
     <div className="flex min-h-screen flex-col bg-white" style={{ minHeight: '100dvh' }}>
       <Header
         aoImportar={() => setModoImportar(true)}
+        aoLimpar={handleLimpar}
         importando={importando}
         importadoEm={importadoEm}
+        prazoHoras={prazoHoras}
         mostrarBotaoImportar={temDados && !modoImportar}
+        mostrarBotaoLimpar={temDados}
         aoSair={logout}
       />
 
@@ -58,6 +74,8 @@ function Painel() {
             onImportar={handleImportar}
             importando={importando}
             erro={erro}
+            expirado={expirado}
+            prazoHoras={prazoHoras}
             podeVoltar={temDados}
             onVoltar={() => setModoImportar(false)}
           />

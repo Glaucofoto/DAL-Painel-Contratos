@@ -3,9 +3,12 @@ import { formatarDataHora } from '../utils/formatters.js'
 
 export default function Header({
   aoImportar,
+  aoLimpar,
   importando,
   importadoEm,
+  prazoHoras,
   mostrarBotaoImportar,
+  mostrarBotaoLimpar,
   aoSair,
 }) {
   return (
@@ -25,6 +28,7 @@ export default function Header({
         {importadoEm && (
           <p className="text-xs text-gray-400">
             Planilha importada em {formatarDataHora(importadoEm.toISOString())}
+            {prazoHoras ? ` · validade de ${prazoHoras}h` : ''}
           </p>
         )}
       </div>
@@ -38,6 +42,16 @@ export default function Header({
             className="hidden bg-primary px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#142d54] disabled:cursor-not-allowed disabled:opacity-50 sm:block"
           >
             Importar planilha
+          </button>
+        )}
+
+        {mostrarBotaoLimpar && (
+          <button
+            type="button"
+            onClick={aoLimpar}
+            className="shrink-0 text-xs text-gray-400 underline hover:text-danger"
+          >
+            Limpar planilha
           </button>
         )}
 
