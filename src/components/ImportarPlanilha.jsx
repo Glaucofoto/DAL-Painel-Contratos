@@ -3,9 +3,33 @@ import { URL_CONTRATOS_LOGIN } from '../config/config.js'
 
 const PASSOS = [
   'Acesse o Contratos.gov.br e faça login (gov.br ou e-mail e senha).',
-  'No menu Contratos, filtre pela sua UASG (110120) e pelos instrumentos desejados.',
+  'Abra a lista de Contratos da sua unidade (UASG 110120).',
+  'Selecione as colunas a exportar — marque TODAS as listadas abaixo (na dúvida, marque todas as colunas disponíveis).',
+  'Vá até o FINAL da página e marque "Selecionar todos" / "Todos", para exportar a carteira inteira e não apenas a primeira página.',
   'Clique em Exportar / Baixar planilha e salve o arquivo (.xlsx ou .csv).',
   'Volte aqui e importe o arquivo no campo abaixo.',
+]
+
+// Colunas usadas pelo painel e a que servem. Exportar todas garante que os
+// cinco painéis apareçam completos; se faltar alguma, o painel correspondente
+// fica incompleto ou vazio.
+const COLUNAS = [
+  { nome: 'Número do instrumento', para: 'identifica cada contrato/empenho — usada em todas as abas' },
+  { nome: 'Tipo', para: 'separa Contrato, Empenho, Termo etc. — rosca de distribuição e aba Empenhos' },
+  { nome: 'Categoria', para: 'coluna da tabela de empenhos' },
+  { nome: 'Fornecedor', para: 'nome e CNPJ nos cards e na tabela' },
+  { nome: 'Objeto', para: 'descrição do instrumento nos cards' },
+  { nome: 'Processo', para: 'número do processo (referência)' },
+  { nome: 'Vig. Início', para: 'base de "Recém-Formalizados" e data dos empenhos' },
+  { nome: 'Vig. Fim', para: 'base de "A Vencer", "Prorrogáveis" e do semáforo de urgência' },
+  { nome: 'Valor Global', para: 'todos os totais e o gráfico de valor por tipo' },
+  { nome: 'Núm. Parcelas', para: 'detalhamento do instrumento' },
+  { nome: 'Valor Parcela', para: 'detalhamento do instrumento' },
+  { nome: 'Prorrogável', para: 'define a aba "Prorrogáveis"' },
+  { nome: 'Modalidade da Compra', para: 'exibida nos cards' },
+  { nome: 'Data Encerramento', para: 'define se o instrumento está ativo (vazia = ativo)' },
+  { nome: 'Atualizado em', para: 'referência da última atualização no sistema' },
+  { nome: 'Unidades Requisitantes', para: 'unidade demandante (complementar)' },
 ]
 
 export default function ImportarPlanilha({
@@ -53,6 +77,13 @@ export default function ImportarPlanilha({
       {/* Passo a passo */}
       <div>
         <p className="mb-2 text-sm font-semibold text-primary">Passo a passo</p>
+        <p className="mb-3 text-sm leading-relaxed text-gray-600">
+          Dois cuidados garantem que os cinco painéis apareçam completos:{' '}
+          <strong className="text-ink">exportar todas as colunas</strong> (cada uma
+          alimenta uma parte do painel) e{' '}
+          <strong className="text-ink">selecionar todos os registros</strong> (para
+          trazer a carteira inteira, não só a primeira página da lista).
+        </p>
         <ol className="space-y-2">
           {PASSOS.map((passo, i) => (
             <li key={i} className="flex gap-3 text-sm text-gray-700">
@@ -71,6 +102,29 @@ export default function ImportarPlanilha({
         >
           Abrir o Contratos.gov.br ↗
         </a>
+      </div>
+
+      {/* Colunas necessárias */}
+      <div className="border border-gray-200 bg-panel p-4">
+        <p className="text-sm font-semibold text-primary">
+          Colunas a exportar (e para que servem)
+        </p>
+        <p className="mt-1 text-xs text-gray-500">
+          Na tela de exportação do Contratos.gov.br, marque estas colunas. Se
+          alguma faltar, o painel correspondente pode ficar incompleto — na dúvida,
+          selecione todas as disponíveis.
+        </p>
+        <ul className="mt-3 space-y-1.5">
+          {COLUNAS.map((c) => (
+            <li key={c.nome} className="flex gap-2 text-xs leading-snug">
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-secondary" />
+              <span>
+                <span className="font-semibold text-ink">{c.nome}</span>
+                <span className="text-gray-500"> — {c.para}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* Área de upload */}
