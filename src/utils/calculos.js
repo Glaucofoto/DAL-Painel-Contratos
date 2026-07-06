@@ -128,15 +128,15 @@ export function agruparPorCampo(contratos, campo, rotuloVazio = 'Não informado'
 // Produção da área (por ano de formalização).
 //
 // "Formalização" usa a data de início da vigência (a planilha não traz a data
-// de assinatura). Os instrumentos são agrupados em quatro faixas para leitura
-// gerencial: Contratos, Empenhos, Aditivos (Termos Aditivos / Apostilamentos —
-// proxy de prorrogações e alterações) e Outros.
+// de assinatura). Os instrumentos são agrupados em faixas para leitura
+// gerencial: Contratos, Empenhos e Outros. (Aditivos não entram: no
+// Contratos.gov.br são alterações de um contrato, não instrumentos próprios, e
+// não aparecem como linhas no export.)
 // ---------------------------------------------------------------------------
 const MESES_CURTOS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
 
 export function faixaProducao(c) {
   const t = normalizar(c.tipo)
-  if (/aditiv|apostila/.test(t)) return 'Aditivos'
   if (c.isEmpenho || t === 'empenho') return 'Empenhos'
   if (t === 'contrato') return 'Contratos'
   return 'Outros'
@@ -164,12 +164,11 @@ export function producaoAno(contratos, ano) {
     (c) => c.dataFormalizacao && c.dataFormalizacao.getFullYear() === ano,
   )
 
-  const faixas = { Contratos: 0, Empenhos: 0, Aditivos: 0, Outros: 0 }
+  const faixas = { Contratos: 0, Empenhos: 0, Outros: 0 }
   const porMes = MESES_CURTOS.map((mes) => ({
     mes,
     Contratos: 0,
     Empenhos: 0,
-    Aditivos: 0,
     Outros: 0,
   }))
   let valorTotal = 0

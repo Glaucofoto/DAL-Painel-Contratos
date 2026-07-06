@@ -14,7 +14,7 @@ import { anosFormalizacao, producaoAno } from '../utils/calculos.js'
 import { corTipo, CORES_FAIXA } from '../utils/tiposInstrumento.js'
 import { formatarMoeda } from '../utils/formatters.js'
 
-const FAIXAS = ['Contratos', 'Empenhos', 'Aditivos', 'Outros']
+const FAIXAS = ['Contratos', 'Empenhos', 'Outros']
 
 export default function Producao({ contratos }) {
   const anos = useMemo(() => anosFormalizacao(contratos), [contratos])
@@ -54,11 +54,10 @@ export default function Producao({ contratos }) {
       </div>
 
       {/* Cards de produção */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <CardIndicador rotulo="Instrumentos formalizados" valor={dados.total} />
         <CardIndicador rotulo="Contratos" valor={dados.faixas.Contratos} />
         <CardIndicador rotulo="Empenhos emitidos" valor={dados.faixas.Empenhos} />
-        <CardIndicador rotulo="Aditivos / prorrogações" valor={dados.faixas.Aditivos} />
         <CardIndicador rotulo="Valor formalizado" valor={formatarMoeda(dados.valorTotal)} />
       </div>
 
@@ -137,10 +136,9 @@ export default function Producao({ contratos }) {
       <p className="border-t border-gray-200 pt-4 text-xs leading-relaxed text-gray-500">
         <strong className="text-gray-600">Nota.</strong> A produção considera a data
         de início da vigência como referência de formalização (a planilha não traz a
-        data de assinatura). "Aditivos / prorrogações" agrupa os instrumentos do tipo
-        Termo Aditivo/Apostilamento presentes na planilha — a base não registra a
-        prorrogação como evento isolado, então esse número é um indicador aproximado,
-        limitado ao que o export do Contratos.gov.br fornece.
+        data de assinatura). Aditivos e prorrogações não são contabilizados: no
+        Contratos.gov.br são alterações de um contrato existente, não instrumentos
+        próprios, e não aparecem como linhas no export.
       </p>
     </div>
   )
