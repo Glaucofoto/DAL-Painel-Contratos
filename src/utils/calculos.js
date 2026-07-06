@@ -43,6 +43,17 @@ export function estaVigente(c) {
   return dFim != null && dFim >= 0 // vence hoje ou depois
 }
 
+// Situação real do instrumento, coerente com o card "Instrumentos vigentes":
+//   Encerrado (tem Data Encerramento) · A iniciar (vigência começa no futuro) ·
+//   Vigente (em vigor hoje) · Expirado (venceu, mas não foi encerrado formalmente).
+export function situacaoInstrumento(c) {
+  if (c.dataEncerramento) return 'Encerrado'
+  const dInicio = diasAte(c.vigenciaInicio)
+  if (dInicio != null && dInicio > 0) return 'A iniciar'
+  if (estaVigente(c)) return 'Vigente'
+  return 'Expirado'
+}
+
 // --- Janelas de formalização (hoje / ontem / anteontem) --------------------
 export function diasDesdeFormalizacao(c) {
   const dias = diasAte(c.dataFormalizacao)

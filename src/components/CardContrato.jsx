@@ -1,7 +1,16 @@
 import { useState } from 'react'
 import { corTipo, rotuloTipo } from '../utils/tiposInstrumento.js'
 import { formatarData, formatarMoeda, textoContagem } from '../utils/formatters.js'
+import { situacaoInstrumento } from '../utils/calculos.js'
 import { corSemaforo } from './SemaforoVencimento.jsx'
+
+// Cores da etiqueta de situação, coerentes com o card "Instrumentos vigentes".
+const CORES_SITUACAO = {
+  Vigente: '#2D7A4F', // verde
+  Expirado: '#B45309', // âmbar — venceu, mas não foi encerrado
+  Encerrado: '#64748B', // cinza
+  'A iniciar': '#3B6BA5', // azul
+}
 
 // Card de instrumento reutilizado em várias abas.
 // Props opcionais controlam realces contextuais:
@@ -16,6 +25,7 @@ export default function CardContrato({
   diasParaInstrucao = null,
 }) {
   const [aberto, setAberto] = useState(false)
+  const situacao = situacaoInstrumento(contrato)
   const objeto = contrato.objeto || 'Objeto não informado.'
   const longo = objeto.length > 160
   const objetoExibido = aberto || !longo ? objeto : `${objeto.slice(0, 160).trimEnd()}…`
@@ -75,7 +85,11 @@ export default function CardContrato({
         </Info>
         <Info rotulo="Valor global">{formatarMoeda(contrato.valorGlobal)}</Info>
         <Info rotulo="Modalidade">{contrato.modalidade || '—'}</Info>
-        <Info rotulo="Situação">{contrato.situacao || '—'}</Info>
+        <Info rotulo="Situação">
+          <span className="font-semibold" style={{ color: CORES_SITUACAO[situacao] }}>
+            {situacao}
+          </span>
+        </Info>
         <Info rotulo="Prorrogável">{contrato.prorrogavel ? 'Sim' : 'Não'}</Info>
       </dl>
 
