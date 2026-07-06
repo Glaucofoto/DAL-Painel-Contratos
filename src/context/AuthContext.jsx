@@ -21,6 +21,12 @@ function lerSessao() {
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => lerSessao())
   const [carregando, setCarregando] = useState(false)
+  // Evita o flash da tela de login quando o acesso vem do Portal DAL (#sso=):
+  // se há token SSO na URL e ainda não há sessão, iniciamos em carregamento
+  // (decisão síncrona, antes da 1ª pintura) até a troca do token concluir.
+  const [inicializando, setInicializando] = useState(
+    () => !lerSessao() && /(?:^#|&)sso=/.test(window.location.hash)
+  )
   const timerRef = useRef(null)
 
   const logout = useCallback(() => {
@@ -89,7 +95,10 @@ export function AuthProvider({ children }) {
       window.location.pathname + window.location.search
     )
 
-    if (sessionStorage.getItem(TOKEN_KEY)) return // já autenticado
+    if (sessionStorage.getItem(TOKEN_KEY)) {
+      setInicializando(false)
+      return // já autenticado
+    }
 
     ;(async () => {
       try {
@@ -106,13 +115,15 @@ export function AuthProvider({ children }) {
         }
       } catch {
         // silencioso — o usuário verá a tela de senha
+      } finally {
+        setInicializando(false)
       }
     })()
   }, [])
 
   return (
     <AuthContext.Provider
-      value={{ token, autenticado: !!token, carregando, login, logout }}
+      value={{ token, autenticado: !!token, carregando, inicializando, login, logout }}
     >
       {children}
     </AuthContext.Provider>

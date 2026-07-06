@@ -110,8 +110,25 @@ function Painel() {
   )
 }
 
+function TelaCarregando() {
+  return (
+    <div
+      className="flex min-h-screen items-center justify-center bg-white"
+      style={{ minHeight: '100dvh' }}
+    >
+      <div
+        className="h-10 w-10 animate-spin rounded-full"
+        style={{ border: '4px solid #E5E7EB', borderTopColor: '#1A3A6B' }}
+        role="status"
+        aria-label="Carregando"
+      />
+    </div>
+  )
+}
+
 function Portal() {
-  const { autenticado } = useAuth()
+  const { autenticado, inicializando } = useAuth()
+  if (inicializando) return <TelaCarregando />
   if (!autenticado) return <Login />
   return <Painel />
 }
