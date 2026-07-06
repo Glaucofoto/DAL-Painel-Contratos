@@ -16,7 +16,7 @@ import {
   agruparPorCampo,
   contratosAVencer,
   distribuicaoPorTipo,
-  estaAtivo,
+  estaVigente,
   formalizadosPorDia,
   prorrogaveisAVencer,
 } from '../utils/calculos.js'
@@ -31,7 +31,7 @@ function moedaCompacta(valor) {
 
 export default function VisaoGeral({ contratos }) {
   const resumo = useMemo(() => {
-    const ativos = contratos.filter(estaAtivo)
+    const vigentes = contratos.filter(estaVigente)
     const grupos = formalizadosPorDia(contratos)
     const formalizadosHoje = grupos.hoje.length
     const ultimos2 = grupos.ontem.length + grupos.anteontem.length
@@ -50,7 +50,7 @@ export default function VisaoGeral({ contratos }) {
     const modalidades = agruparPorCampo(contratos, 'modalidade').slice(0, 8)
 
     return {
-      ativos: ativos.length,
+      vigentes: vigentes.length,
       formalizadosHoje,
       ultimos2,
       aVencerTotal: aVencer.length,
@@ -67,7 +67,7 @@ export default function VisaoGeral({ contratos }) {
     <div className="space-y-6">
       {/* Cards de totais */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <CardIndicador rotulo="Instrumentos ativos" valor={resumo.ativos} />
+        <CardIndicador rotulo="Instrumentos vigentes" valor={resumo.vigentes} />
         <CardIndicador rotulo="Formalizados hoje" valor={resumo.formalizadosHoje} />
         <CardIndicador
           rotulo="Formalizados (últimos 2 dias)"
@@ -226,10 +226,13 @@ export default function VisaoGeral({ contratos }) {
         refletem a última planilha exportada do Contratos.gov.br (Comprasnet
         Contratos) para a UASG 110120 e importada neste painel. As janelas temporais
         (hoje, últimos 2 dias, próximos 30 dias) são calculadas no navegador a partir
-        da data atual (horário de Brasília). "Instrumentos ativos" considera os que
-        não têm data de encerramento; "formalizados" usa a data de início da vigência
-        (a planilha não traz a data de assinatura). Reimporte a planilha para
-        atualizar e confirme informações críticas na fonte oficial.
+        da data atual (horário de Brasília). "Instrumentos vigentes" conta os que
+        estão em vigor hoje — não encerrados, já iniciados e ainda dentro da vigência
+        (ou de vigência indeterminada); por isso é bem menor que o total de linhas da
+        planilha, que inclui empenhos e contratos já vencidos. "Formalizados" usa a
+        data de início da vigência (a planilha não traz a data de assinatura).
+        Reimporte a planilha para atualizar e confirme informações críticas na fonte
+        oficial.
       </p>
     </div>
   )

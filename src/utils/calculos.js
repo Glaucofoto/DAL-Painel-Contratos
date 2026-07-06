@@ -25,9 +25,22 @@ export function diasAte(data) {
   return Math.round((alvo.getTime() - hoje().getTime()) / UM_DIA_MS)
 }
 
-// Instrumento vigente: sem data de encerramento registrada.
+// Instrumento sem encerramento formal (Data Encerramento vazia). Reflete a
+// coluna do export, mas inclui contratos já vencidos que não foram encerrados.
 export function estaAtivo(c) {
   return !!c.ativo
+}
+
+// Instrumento EM VIGOR hoje: não encerrado, já iniciado e ainda dentro da
+// vigência (ou de vigência indeterminada). É o que melhor reflete a situação
+// real da carteira — bem menor que o total "sem encerramento".
+export function estaVigente(c) {
+  if (c.dataEncerramento) return false
+  const dInicio = diasAte(c.vigenciaInicio)
+  if (dInicio != null && dInicio > 0) return false // começa no futuro
+  if (c.vigenciaIndeterminada) return true
+  const dFim = diasAte(c.vigenciaFim)
+  return dFim != null && dFim >= 0 // vence hoje ou depois
 }
 
 // --- Janelas de formalização (hoje / ontem / anteontem) --------------------
