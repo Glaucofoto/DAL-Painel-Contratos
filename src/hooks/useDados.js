@@ -12,7 +12,7 @@ import { lerPlanilha, normalizarLista } from '../utils/planilha.js'
 // ---------------------------------------------------------------------------
 
 const CHAVE = 'dal-contratos-planilha-v1'
-const PRAZO_MS = 9 * 60 * 60 * 1000 // 9 horas
+const PRAZO_MS = 12 * 60 * 60 * 1000 // 12 horas
 
 function lerArmazenado() {
   try {
